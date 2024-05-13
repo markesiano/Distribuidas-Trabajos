@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 400px;
+            padding: 35px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-group">
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion">
+        </div>
+        <div class="form-group">
+            <label for="valor_a">Valor A:</label>
+            <input type="text" id="valor_a">
+        </div>
+        <div class="form-group">
+            <label for="valor_b">Valor B:</label>
+            <input type="text" id="valor_b">
+        </div>
+        <button class="btn" onclick="sumar()">Sumar</button>
+        <button class="btn" onclick="restar()">Restar</button>
+        <button class="btn" onclick="multiplicar()">Multiplicar</button>
+        <button class="btn" onclick="dividir()">Dividir</button>
+    </div>
+
+    <script>
+        function makeSoapRequest(operation, a, b) {
+            var direccion = document.getElementById('direccion').value;
+            var soapRequest = `
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://servicios/">
+                <soapenv:Header/>
+                <soapenv:Body>
+                    <tns:${operation}>
+                        <a>${a}</a>
+                        <b>${b}</b>
+                    </tns:${operation}>
+                </soapenv:Body>
+            </soapenv:Envelope>
+            `;
+
+            var xhr = new XMLHttpRequest();
+            var url = `http://${direccion}:8080/myapp/ws/Calculadora`;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "text/xml");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = xhr.responseText;
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(response, "text/xml");
+                    var result = xmlDoc.getElementsByTagName("return")[0].textContent;
+                    alert(`El resultado de la operación es: ${result}`);
+                }
+            };
+            xhr.send(soapRequest);
+        }
+
+        function sumar() {
+            var a = document.getElementById('valor_a').value;
+            var b = document.getElementById('valor_b').value;
+            makeSoapRequest("sumar", a, b);
+        }
+
+        function restar() {
+            var a = document.getElementById('valor_a').value;
+            var b = document.getElementById('valor_b').value;
+            makeSoapRequest("restar", a, b);
+        }
+
+        function multiplicar() {
+            var a = document.getElementById('valor_a').value;
+            var b = document.getElementById('valor_b').value;
+            makeSoapRequest("multiplicar", a, b);
+        }
+
+        function dividir() {
+            var a = document.getElementById('valor_a').value;
+            var b = document.getElementById('valor_b').value;
+            if (b === "0") {
+                alert("No se puede dividir por cero");
+                return;
+            }
+            makeSoapRequest("dividir", a, b);
+        }
+    </script>
+</body>
+</html>

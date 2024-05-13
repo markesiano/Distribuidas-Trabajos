@@ -1,0 +1,5 @@
+Historial
+Jesus: 1
+Judas: 0
+Jesus: Si
+jesus: a
